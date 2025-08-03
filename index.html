@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
+  <title>Loading Video with YouTube</title>
+  <style>
+    html, body {
+      margin: 0; padding: 0; height: 100%; background: #000;
+      overflow: hidden;
+    }
+    #yt-player, #player-wrapper {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      z-index: 10;
+      background: #000;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #player-wrapper {
+      pointer-events: none; /* Không cho tương tác */
+    }
+    #login-form {
+      display: none;
+      position: fixed;
+      z-index: 20;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: #111d;
+      color: #fff;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      font-family: sans-serif;
+    }
+    #login-form form {
+      background: #222c;
+      border-radius: 10px;
+      padding: 24px 16px;
+      box-shadow: 0 4px 24px #0008;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-width: 240px;
+      max-width: 86vw;
+    }
+    #login-form input, #login-form button {
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      font-size: 1em;
+    }
+    #login-form button {
+      background: #08f;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #overlay {
+      position:fixed;top:0;left:0;width:100vw;height:100vh;
+      background:#000c;z-index:100;display:flex;align-items:center;justify-content:center;
+    }
+    #startBtn {
+      font-size:2em;padding:1em 2em;border-radius:16px;border:none;background:#08f;color:#fff;font-weight:bold;
+      box-shadow: 0 2px 12px #0008;
+    }
+    @media (max-width: 600px) {
+      #login-form form { min-width: 80vw; max-width: 96vw; padding: 16px 8px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="overlay">
+    <button id="startBtn">Bấm để bắt đầu</button>
+  </div>
+  <div id="player-wrapper">
+    <div id="yt-player"></div>
+  </div>
+  <!-- Form đăng nhập sẽ hiện sau khi video kết thúc -->
+  <div id="login-form">
+    <form>
+      <h2>Đăng nhập</h2>
+      <input type="text" placeholder="Tên đăng nhập" required>
+      <input type="password" placeholder="Mật khẩu" required>
+      <button type="submit">Đăng nhập</button>
+    </form>
+  </div>
+  <!-- YouTube API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script>
+    let player;
+    let ytReady = false;
+    // ID video YouTube của bạn
+    const VIDEO_ID = "3sIIvQSYzVw"; // Thay bằng ID video short của bạn
+    
+    function onYouTubeIframeAPIReady() {
+      ytReady = true;
+    }
+
+    // Khi người dùng bấm "Bắt đầu", mới tạo player (đảm bảo autoplay có tiếng)
+    document.getElementById('startBtn').onclick = function() {
+      document.getElementById('overlay').style.display = "none";
+      if (ytReady) {
+        startPlayer();
+      } else {
+        // Nếu API chưa sẵn sàng, đợi 200ms và thử lại
+        let waitYt = setInterval(() => {
+          if (ytReady) {
+            clearInterval(waitYt);
+            startPlayer();
+          }
+        }, 200);
+      }
+    };
+
+    function startPlayer() {
+      player = new YT.Player('yt-player', {
+        height: '100%',
+        width: '100%',
+        videoId: VIDEO_ID,
+        playerVars: {
+          autoplay: 1,
+          controls: 0, // ẩn control
+          disablekb: 1, // tắt phím tắt bàn phím
+          modestbranding: 1, // giảm logo
+          fs: 0, // không fullscreen
+          rel: 0, // không gợi ý ngoài kênh
+          iv_load_policy: 3, // không chú thích
+          showinfo: 0,
+          playsinline: 1,
+          enablejsapi: 1,
+          origin: window.location.origin
+        },
+        events: {
+          'onReady': (e) => {
+            // Phát và bật tiếng
+            e.target.unMute();
+            e.target.setVolume(100);
+            e.target.playVideo();
+            // Không cho tương tác (ẩn tab-focus, pointer-events:none)
+            document.getElementById('player-wrapper').style.pointerEvents = 'none';
+          },
+          'onStateChange': onPlayerStateChange
+        }
+      });
+    }
+
+    // Xử lý khi video kết thúc
+    function onPlayerStateChange(event) {
+      if (event.data == YT.PlayerState.ENDED) {
+        document.getElementById('player-wrapper').style.display = 'none';
+        document.getElementById('login-form').style.display = 'flex';
+      }
+    }
+  </script>
+</body>
+</html>
