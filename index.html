@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Phát Video từ Link</title>
+</head>
+<body>
+  <h2>Nhập link YouTube hoặc Vimeo:</h2>
+  <input type="text" id="videoLink" placeholder="Dán link vào đây">
+  <button onclick="playVideo()">Phát</button>
+  <br><br>
+  <div id="videoFrame"></div>
+  <script>
+    function playVideo() {
+      const url = document.getElementById('videoLink').value;
+      let embedUrl = '';
+      if (url.includes('youtube.com') || url.includes('youtu.be')) {
+        const videoId = url.split('v=')[1]?.split('&')[0] || url.split('/').pop();
+        embedUrl = `https://www.youtube.com/embed/${videoId}`;
+      } else if (url.includes('vimeo.com')) {
+        const videoId = url.split('/').pop();
+        embedUrl = `https://player.vimeo.com/video/${videoId}`;
+      }
+      if (embedUrl) {
+        document.getElementById('videoFrame').innerHTML =
+          `<iframe width="480" height="270" src="${embedUrl}" frameborder="0" allowfullscreen></iframe>`;
+      } else {
+        document.getElementById('videoFrame').innerText = "Link không hợp lệ!";
+      }
+    }
+  </script>
+</body>
+</html>
