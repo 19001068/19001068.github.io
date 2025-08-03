@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
+  <title>Short Video Loading</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+    }
+    #video-bg {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      z-index: 10;
+      background: #000;
+      pointer-events: none; /* Disable user interaction */
+      touch-action: none;   /* Further prevent gestures on mobile */
+      user-select: none;
+    }
+    #login-form {
+      display: none;
+      position: fixed;
+      z-index: 20;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: #111d;
+      color: #fff;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      font-family: sans-serif;
+    }
+    #login-form form {
+      background: #222c;
+      border-radius: 10px;
+      padding: 24px 16px;
+      box-shadow: 0 4px 24px #0008;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-width: 240px;
+      max-width: 86vw;
+    }
+    #login-form input, #login-form button {
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      font-size: 1em;
+    }
+    #login-form button {
+      background: #08f;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    @media (max-width: 600px) {
+      #login-form form {
+        min-width: 80vw;
+        max-width: 96vw;
+        padding: 16px 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Thay src video này bằng link mp4 của bạn, có thể dùng Cloudinary, Vercel, ... -->
+  <video 
+    id="video-bg"
+    autoplay
+    muted
+    playsinline
+    preload="auto"
+    disablepictureinpicture
+    controlslist="nodownload noplaybackrate nofullscreen"
+    oncontextmenu="return false;"
+  >
+    <source src="https://youtu.be/3sIIvQSYzVw?feature=shared" type="video/mp4">
+    Trình duyệt của bạn không hỗ trợ video.
+  </video>
+
+  <!-- Form đăng nhập sẽ hiện sau khi video kết thúc -->
+  <div id="login-form">
+    <form>
+      <h2>Đăng nhập</h2>
+      <input type="text" placeholder="Tên đăng nhập" required>
+      <input type="password" placeholder="Mật khẩu" required>
+      <button type="submit">Đăng nhập</button>
+    </form>
+  </div>
+
+  <script>
+    // Khi video kết thúc, ẩn video và hiện form
+    const video = document.getElementById('video-bg');
+    const loginForm = document.getElementById('login-form');
+    video.addEventListener('ended', function() {
+      video.style.display = 'none';
+      loginForm.style.display = 'flex';
+    });
+
+    // Tắt mọi thao tác với video (tránh hack bằng JS)
+    video.addEventListener('play', () => video.setAttribute('controls', false));
+    video.addEventListener('touchstart', e => e.preventDefault(), {passive:false});
+    video.addEventListener('pointerdown', e => e.preventDefault());
+    video.addEventListener('contextmenu', e => e.preventDefault());
+    video.addEventListener('click', e => e.preventDefault());
+
+    // Ẩn controls nếu trình duyệt tự bật lại
+    video.removeAttribute('controls');
+  </script>
+</body>
+</html>
